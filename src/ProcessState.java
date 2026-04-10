@@ -1,0 +1,8 @@
+//TID: T00521651
+public enum ProcessState {
+    READY,
+    BLOCKED,
+    SUSPENDED_READY,
+    SUSPENDED_BLOCKED,
+    FINISHED
+}
