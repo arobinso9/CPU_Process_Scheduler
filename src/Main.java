@@ -19,8 +19,8 @@ public class Main {
         for (int i = 0; i < 10; i++) {
             processes[i] = new SimProcess(i + 1, "Process" + (i + 1), instructionCounts[i]);
             pcbs[i] = new ProcessControlBlock(processes[i]);
-            pcbs[i].setCurrentInstruction(0);
-            pcbs[i].setRegisters(new int[4]);
+            pcbs[i].setCurrentInstruction(0); // every new process starts at the very beginning (Instruction 0)
+            pcbs[i].setRegisters(new int[4]); // we give each process its own set of 4 registers that are initially empty.
         }
 
         //adding each pcb to the ready queue
@@ -42,9 +42,9 @@ public class Main {
             if (processor.isIdle()) {
                 //if there is a pcb on the ready queue...
                 if (!readyQueue.isEmpty()) {
-                    currentPCB = readyQueue.poll();
+                    currentPCB = readyQueue.poll(); // remove and return the process at the front of the Queue
                     restoreProcessContext(processor, currentPCB, step);
-                    quantumCounter = 0;
+                    quantumCounter = 0; //reset the quantum so process has a fresh 5-tick "lease" on the CPU
                 } else {
                     System.out.printf("Step %d Processor idling (no ready processes)%n", step);
                 }
@@ -52,9 +52,10 @@ public class Main {
 
             // if processor has current process
             else {
-                ProcessState result = processor.executeNextInstruction(step);
+                ProcessState result = processor.executeNextInstruction(step); // run the next instruction and increment quantum
                 quantumCounter++;
 
+                // 3 ways a process leaves the CPU:
                 if (result == ProcessState.FINISHED) {
                     System.out.println("*** Process completed ***");
                     finishedCount++;
@@ -91,6 +92,7 @@ public class Main {
         System.out.println("Blocked processes: " + blockedList.size());
     }
 
+    // when saving context we are asking the processor where it left off.
     private static void saveProcessContext(SimProcessor processor, ProcessControlBlock pcb, int step) {
         pcb.setCurrentInstruction(processor.getCurrInstruction());
         pcb.setRegisters(processor.getRegisterValues());
@@ -101,6 +103,7 @@ public class Main {
                 pcb.getCurrentInstruction(), regs[0], regs[1], regs[2], regs[3]);
     }
 
+    // when restoring we are asking the pcbs- the storage what were the value this process held when it was paused.
     private static void restoreProcessContext(SimProcessor processor, ProcessControlBlock pcb, int step) {
         processor.setCurrentProcess(pcb.getProcess());
         processor.setCurrInstruction(pcb.getCurrentInstruction());
